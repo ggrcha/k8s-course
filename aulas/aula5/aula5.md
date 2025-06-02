@@ -9,6 +9,7 @@
 - Entender a anatomia dos manifestos usados no Kubernetes
 - Identificar e escrever os campos: `apiVersion`, `kind`, `metadata` e `spec`
 - Visualizar exemplos reais de diferentes objetos com foco no campo `spec`
+- Compreender o papel do `apiVersion` a partir da arquitetura REST
 
 ---
 
@@ -20,15 +21,17 @@ YAML é uma linguagem de serialização de dados legível por humanos, amplament
 
 A sigla YAML significa: **YAML Ain’t Markup Language**.
 
+---
+
 ### Estrutura básica do YAML
 
 #### 1. **Dicionários (mapas)**
 
-Usam `chave: valor`, com indentação por espaços:
+Usam `chave: valor`, com indentação por espaços. Um dicionário pode conter outros mapas aninhados:
 ```yaml
-pessoa: 
+pessoa:
   nome: Guilherme
-  idade: 41
+  idade: 30
   profissao: DevOps
 ```
 
@@ -182,6 +185,69 @@ spec:
 
 ---
 
+## 🌐 Entendendo o papel da `apiVersion` com base em HTTP e REST
+
+### O que é REST?
+
+REST (Representational State Transfer) é um estilo de arquitetura que define **como sistemas distribuídos devem se comunicar** via HTTP. Ele é amplamente utilizado na construção de APIs modernas e **influencia diretamente o funcionamento da API do Kubernetes**.
+
+### Verbos HTTP mais comuns em REST:
+
+- `GET` – Recupera um recurso (ex: listar pods)
+- `POST` – Cria um novo recurso (ex: aplicar um novo deployment)
+- `PUT` / `PATCH` – Atualiza um recurso existente
+- `DELETE` – Remove um recurso
+
+Esses verbos são usados para interagir com **URLs (endpoints)** que representam recursos no sistema. Por exemplo:
+```http
+GET /api/v1/pods
+```
+retorna todos os Pods do cluster.
+
+---
+
+### O problema que REST resolveu:
+
+Antes do REST, sistemas utilizavam protocolos complexos e com pouca padronização (ex: SOAP). REST simplificou a comunicação entre serviços com:
+
+- Uso padronizado de HTTP
+- Operações simples com verbos semânticos
+- Arquitetura orientada a recursos
+
+REST se tornou a base da comunicação entre sistemas distribuídos — como é o caso do Kubernetes.
+
+---
+
+### Ligação com o Kubernetes
+
+O Kubernetes é exposto como uma **API RESTful**. Toda a interação com o cluster ocorre via chamadas HTTP, usando os verbos REST sobre recursos como:
+
+- `/api/v1/pods`
+- `/apis/apps/v1/deployments`
+- `/apis/batch/v1/jobs`
+
+---
+
+### Por que o campo `apiVersion` importa?
+
+O campo `apiVersion` em um manifesto YAML do Kubernetes **define a versão da API REST que será usada para aquele tipo de recurso**.
+
+Por exemplo:
+```yaml
+apiVersion: v1      # Para Pods, Services, ConfigMaps
+apiVersion: apps/v1 # Para Deployments, StatefulSets, DaemonSets
+```
+
+Isso garante que o recurso será processado de acordo com a estrutura e semântica esperada pela versão correta da API.
+
+---
+
+🔗 Para saber mais:
+- [Kubernetes API Overview](https://kubernetes.io/docs/concepts/overview/kubernetes-api/)
+- [RESTful API Design — REST vs. SOAP](https://restfulapi.net/)
+
+---
+
 ## ❓ Perguntas para Reflexão
 
 1. Qual a diferença entre uma lista e um dicionário em YAML?
@@ -189,6 +255,16 @@ spec:
 3. Qual a função do campo `metadata.labels`?
 4. O que muda na `spec` de acordo com o tipo de objeto (`kind`)?
 5. Por que o campo `apiVersion` é importante?
+
+---
+
+## ✅ Respostas Sugeridas
+
+1. A lista usa `-` para itens e o dicionário usa `chave: valor`
+2. Erros de indentação, uso de tabulação ou sintaxe incorreta
+3. Permite organizar, selecionar e identificar objetos no cluster
+4. Cada `kind` define uma `spec` específica para aquele tipo de objeto
+5. Ele informa ao API Server qual versão do recurso usar (compatibilidade)
 
 ---
 
@@ -201,11 +277,7 @@ spec:
    - Uma lista de dicionários com 2 pessoas
 
 2. Valide esse arquivo com:
-```bash
-python3 -c "import yaml, sys; yaml.safe_load(sys.stdin)" < exercicio.yaml
-```
-
-(opcional: use o VSCode com extensão YAML + Kubernetes para validação)
+🔗 [https://www.yamllint.com](https://www.yamllint.com)
 
 ---
 
